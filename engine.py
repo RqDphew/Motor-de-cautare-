@@ -1,28 +1,10 @@
-"""
-engine.py — Motor de căutare în texte
-Motor de căutare în texte
-
-Clasa TextSearchEngine combină Trie și KMP:
-  - Trie indexează toate cuvintele din corpus pentru căutare rapidă
-    după prefix și autocomplete.
-  - KMP caută aparițiile exacte ale unui pattern în liniile de text,
-    returnând linia, coloana și contextul.
-"""
-
+# motor de cautare: trie pt cuvinte/prefix, kmp pt pattern in text
 import re
 from trie import Trie
 from kmp import kmp_search_in_corpus, highlight_match, compute_failure
 
 
 class TextSearchEngine:
-    """
-    Motor de căutare bazat pe Trie (indexare cuvinte) și KMP (pattern matching).
-
-    Atribute:
-        trie:   indexul de cuvinte (Trie)
-        lines:  corpusul de text stocat ca listă de linii
-        _name:  numele corpusului (opțional, pentru afișare)
-    """
 
     def __init__(self, name: str = "corpus"):
         self.trie = Trie()
@@ -32,12 +14,6 @@ class TextSearchEngine:
     # Încărcare text
 
     def load_text(self, text: str) -> None:
-        """
-        Încarcă un text în motor:
-          1. Împarte textul în linii
-          2. Extrage toate cuvintele și le inserează în Trie
-          3. Stochează liniile pentru căutarea KMP
-        """
         self.lines = text.splitlines()
 
         for line in self.lines:
@@ -47,24 +23,13 @@ class TextSearchEngine:
                 self.trie.insert(word.lower())
 
     def load_from_file(self, filepath: str) -> None:
-        """Încarcă textul dintr-un fișier."""
         with open(filepath, "r", encoding="utf-8") as f:
             self.load_text(f.read())
 
 
-    # Căutare pattern (KMP)
-
     def search_pattern(self, pattern: str,
                         case_sensitive: bool = False,
                         show_highlight: bool = True) -> None:
-        """
-        Caută `pattern` în corpus folosind algoritmul KMP.
-        Afișează toate aparițiile cu linia, coloana și contextul vizual.
-
-            pattern:        șirul de căutat
-            case_sensitive: dacă True, distinge majuscule/minuscule
-            show_highlight: dacă True, afișează indicatorul ^^^ sub linie
-        """
         if not self.lines:
             print("  [!] Corpusul este gol. Încarcă mai întâi un text.")
             return
@@ -73,7 +38,7 @@ class TextSearchEngine:
             print("  [!] Pattern-ul nu poate fi gol.")
             return
 
-        # Afișăm funcția de eșec pentru transparență didactică
+        # afisam si failure function
         pat_lower = pattern if case_sensitive else pattern.lower()
         failure = compute_failure(pat_lower)
         print(f"\n  Failure function pentru '{pat_lower}': {failure}")
@@ -91,35 +56,20 @@ class TextSearchEngine:
             if show_highlight:
                 print(f"     {highlight_match(match.line_text, match.column, len(pattern))}")
 
-    
-    # Căutare cuvânt exact (Trie)
-    
+
+
 
     def search_word(self, word: str) -> None:
-        """
-        Verifică dacă un cuvânt exact există în index (Trie).
-        Afișează frecvența sa în corpus.
-
-        
-            word: cuvântul de căutat
-        """
         freq = self.trie.search(word)
         if freq > 0:
             print(f"\n  Cuvântul '{word}' există în index. Frecvență: {freq}.")
         else:
             print(f"\n  Cuvântul '{word}' NU există în index.")
 
-    
-    # Autocomplete (Trie prefix)
-    
+
+
 
     def autocomplete(self, prefix: str) -> None:
-        """
-        Returnează toate cuvintele care încep cu `prefix` (căutare în Trie).
-
-        Args:
-            prefix: prefixul de căutat
-        """
         results = self.trie.starts_with(prefix)
         if results:
             print(f"\n  {len(results)} cuvinte cu prefixul '{prefix}':")
@@ -128,19 +78,16 @@ class TextSearchEngine:
         else:
             print(f"\n  Niciun cuvânt cu prefixul '{prefix}'.")
 
-    
-    # Toate cuvintele indexate
+
 
 
     def show_all_words(self) -> None:
-        """Afișează toate cuvintele indexate în Trie, în ordine alfabetică."""
         words = self.trie.get_all_words()
         if not words:
             print("\n  Indexul este gol.")
             return
 
         print(f"\n  {len(words)} cuvinte indexate (ordine alfabetică):\n")
-        # Afișăm pe coloane pentru lizibilitate
         col_width = max(len(w) for w in words) + 4
         cols = max(1, 60 // col_width)
         for i, word in enumerate(words):
@@ -148,11 +95,8 @@ class TextSearchEngine:
             print(f"  {word:<{col_width}}", end=end)
         print()
 
-    # Statistici corpus
-
 
     def show_stats(self) -> None:
-        """Afișează statistici despre corpusul încărcat."""
         total_words = sum(
             len(re.findall(r"[a-zA-ZăâîșțĂÂÎȘȚ]+", line))
             for line in self.lines
@@ -164,7 +108,7 @@ class TextSearchEngine:
         print(f"  ───────────────────────────────────────")
 
 
-# Corpusuri predefinite pentru demo
+# texte pt demo
 
 
 SAMPLE_CORPUS_1 = """Algoritmii de căutare sunt fundamentali în informatică.

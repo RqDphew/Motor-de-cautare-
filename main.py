@@ -1,11 +1,6 @@
-"""
- Motor de căutare în texte
-"""
-
+# motor de cautare in texte - meniu
 from engine import TextSearchEngine, SAMPLE_CORPUS_1, SAMPLE_CORPUS_2
 
-
-# Constante vizuale
 
 LINE  = "─" * 50
 DLINE = "═" * 50
@@ -35,7 +30,6 @@ def print_menu():
 
 
 def load_demo_corpus(engine: TextSearchEngine):
-    """Meniu secundar: alege unul din corpusurile predefinite."""
     print(f"\n{LINE}")
     print("  Corpusuri disponibile:")
     print("  1. Algoritmi și structuri de date")
@@ -57,7 +51,6 @@ def load_demo_corpus(engine: TextSearchEngine):
 
 
 def load_custom_text(engine: TextSearchEngine):
-    """Permite utilizatorului să introducă text de la tastatură."""
     print("\n  Introdu textul (termină cu o linie goală):")
     lines = []
     while True:
@@ -78,7 +71,6 @@ def load_custom_text(engine: TextSearchEngine):
 
 
 def run_full_demo(engine: TextSearchEngine):
-    """Demo automat: încarcă corpus și rulează toate operațiile."""
     print(f"\n{DLINE}")
     print("  DEMO AUTOMAT COMPLET")
     print(DLINE)
@@ -121,7 +113,6 @@ def run_full_demo(engine: TextSearchEngine):
     print(f"\n{DLINE}")
     print("  Demo complet finalizat.")
     print(DLINE)
-
 
 
 def main():

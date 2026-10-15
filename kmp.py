@@ -1,62 +1,37 @@
-"""
-kmp.py - Implementare algoritmul Knuth-Morris-Pratt (KMP)
-
-KMP caută toate aparițiile unui pattern într-un text în timp O(n + m),
-evitând comparațiile redundante prin funcția de eșec (failure function / prefix function).
-"""
-
+# KMP - O(n + m) cu failure function
 from dataclasses import dataclass
 
 
 @dataclass
 class Match:
-    """Reprezintă o apariție a pattern-ului în text."""
-    line_number: int    # linia (1-based) în care s-a găsit
-    column: int         # coloana (0-based) de start în linia respectivă
-    line_text: str      # textul complet al liniei (pentru afișare context)
+    line_number: int    # de la 1
+    column: int         # de la 0
+    line_text: str
 
     def __repr__(self) -> str:
         return f"Linia {self.line_number}, coloana {self.column}"
 
 
-
-# Funcția de eșec (prefix function)
+# failure[i] = cel mai lung prefix care e si sufix, ex: ababc -> [0,0,1,2,0]
 
 def compute_failure(pattern: str) -> list[int]:
-    """
-    Construiește funcția de eșec (prefix function) pentru `pattern`.
-
-    failure[i] = lungimea celui mai lung prefix propriu al pattern[0..i]
-                 care este și sufix al aceluiași subșir.
-
-    Exemplu: pattern = "ababc"
-      failure = [0, 0, 1, 2, 0]
-
-    """
     m = len(pattern)
     failure = [0] * m
-    k = 0  # lungimea prefixului curent potrivit
+    k = 0
 
-    # Parcurgem de la poziția 1 (failure[0] este mereu 0)
     for i in range(1, m):
-        # Dacă nu se potrivesc, folosim failure pentru a retrage
         while k > 0 and pattern[k] != pattern[i]:
             k = failure[k - 1]
 
         if pattern[k] == pattern[i]:
-            k += 1  # am extins prefixul potrivit
+            k += 1
 
         failure[i] = k
 
     return failure
 
 
-# Căutare KMP în șir unic
-
 def kmp_search(text: str, pattern: str) -> list[int]:
-    """
-    Găsește toate pozițiile (0-based) la care `pattern` apare în `text`.
-    """
 
     n, m = len(text), len(pattern)
 
@@ -65,32 +40,26 @@ def kmp_search(text: str, pattern: str) -> list[int]:
 
     failure = compute_failure(pattern)
     positions: list[int] = []
-    q = 0  # numărul de caractere ale pattern-ului potrivite până acum
+    q = 0  # cate caractere se potrivesc
 
     for i in range(n):
-        # Retragere prin failure function cât timp nu se potrivesc
         while q > 0 and pattern[q] != text[i]:
             q = failure[q - 1]
 
         if pattern[q] == text[i]:
-            q += 1  # potrivire parțială extinsă
+            q += 1
 
         if q == m:
-            # Pattern complet găsit: poziția de start este i - m + 1
             positions.append(i - m + 1)
-            q = failure[q - 1]  # continuăm căutarea (permite suprapuneri)
+            q = failure[q - 1]  # merge si cu suprapuneri
 
     return positions
 
 
-# Căutare KMP în corpus
+# cauta in fiecare linie
 
 def kmp_search_in_corpus(lines: list[str], pattern: str,
                           case_sensitive: bool = False) -> list[Match]:
-    """
-    Caută `pattern` în toate liniile unui corpus text.
-    Returnează lista de obiecte Match cu linia, coloana și contextul.
-    """
     if not pattern:
         return []
 
@@ -104,20 +73,13 @@ def kmp_search_in_corpus(lines: list[str], pattern: str,
 
         for col in positions:
             matches.append(Match(
-                line_number=line_idx + 1,   # 1-based pentru afișare
+                line_number=line_idx + 1,
                 column=col,
-                line_text=line.rstrip()     # fără newline trailing
+                line_text=line.rstrip()
             ))
 
     return matches
 
 
-# Utilitar: afișare vizuală a potrivirii
-
-
 def highlight_match(line_text: str, column: int, pattern_len: int) -> str:
-    """
-    Construiește un string care evidențiază poziția pattern-ului în linie.
-
-    """
     return " " * column + "^" * pattern_len
